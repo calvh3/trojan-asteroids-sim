@@ -1,7 +1,8 @@
 """
 This Programme solves the reduced three-body problem for a particle placed 
-in the Jupiter/Mars systems. The chosen reference frame has origin at the Sun-Planet 
+in a sun, planet, asteroid system. The chosen reference frame has origin at the Sun-Planet 
 barycentre and rotates at the planets angular velocity. 
+    (reduced three-body means, asteroid mass << planet mass)
 """
 
 import numpy as np
@@ -153,11 +154,13 @@ class Trojan:
             print("Compute an Orbit first using .OribtSolve")
 
     def WanderGrid(self,orbits):
+        #Computes a 2D grid where each point in space is a 'Wander' value which measures the orbit stability
         X = self.OribtSolve(orbits,n=self.res2,solve_ivp=True).T
         self.wandergrid = self.Wander(X[:,0:self.res2],X[:,self.res2:2*self.res2]).reshape((self.res,self.res))
         return self.wandergrid
     
     def LibrationGrid(self,orbits):
+        #Computes a 2D grid where each point in space is a 'Libration' value which measures the orbit stability
         X = self.OribtSolve(orbits,n=self.res2,solve_ivp=True).T
         self.librationgrid = self.Libration(X[:,0:self.res2],X[:,self.res2:2*self.res2]).reshape((self.res,self.res))                
         return self.librationgrid
