@@ -1,5 +1,5 @@
 """
-This Programme solves the restricted three-body problem for a particle placed 
+This Programme solves the reduced three-body problem for a particle placed 
 in the Jupiter/Mars systems. The chosen reference frame has origin at the Sun-Planet 
 barycentre and rotates at the planets angular velocity. 
 """
