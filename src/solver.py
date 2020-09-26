@@ -9,9 +9,11 @@ import numpy as np
 import scipy.integrate
 import cmath
 import matplotlib.pyplot as plt
+
 #The Planet to be simulated is defined as a class 
-#Define a Planet by Planet Mass (Mp) and Sun-Planet Radius R.
+
 class Planet:
+    #Define a Planet by Planet Mass (Mp) and Sun-Planet Radius R.
     def __init__(self, Mp, R):
         self.Mp = Mp                                #Planet Mass (in Solar Masses)
         self.R = R                                  #Sun-Planet Radius (in Au)
@@ -37,7 +39,17 @@ class Planet:
 
 class Trojan:
     def __init__(self,Planet,X0,width=0,res=1,Polar=False):
-        #Define a Trojan from its start position at t=0, and planet class in trojan system.
+        """
+        Define a Trojan from its start position at t=0, and planet class in trojan system.
+            Planet is the planet class in the system
+            X0 is the start position
+        width/res and Polar are required for inputting a search space to generate orbits for 
+        (not required for single orbits)
+            width is width of square/circle to be searched around X0 (in Au).
+            res is the resolution (produces search space of resXres points)
+            if Polar=True searches a circular annulus with width=width, starting from planet 
+            (rather than square).
+        """
         self.Planet = Planet
         self.res = res
         self.Polar = Polar
@@ -52,18 +64,22 @@ class Trojan:
         if Polar == False:
             self.X0 = X0
             delta = self.width/self.res              #Step size 
-            (self.x0, self.y0)=np.meshgrid(self.X0[0]-self.width/2+delta*np.arange(0,self.res,1),self.X0[1]-self.width/2+delta*np.arange(0,self.res,1))
+            (self.x0, self.y0)=np.meshgrid(self.X0[0]-self.width/2+delta*np.arange(0,self.res,1),
+                                                self.X0[1]-self.width/2+delta*np.arange(0,self.res,1))
             
             (Vx,Vy)=(np.zeros(self.res2),np.zeros(self.res2))
         
-            self.X00 = np.concatenate((self.x0.reshape(self.res2),self.y0.reshape(self.res2),Vx.reshape(self.res2),Vy.reshape(self.res2)))
+            self.X00 = np.concatenate((self.x0.reshape(self.res2),self.y0.reshape(self.res2),
+                                            Vx.reshape(self.res2),Vy.reshape(self.res2)))
 
         if Polar == True:
             Rin = np.sqrt(self.Planet.Lx**2+self.Planet.Ly**2)-width/2
             Rout = Rin+width
-            (self.theta,self.r)=np.meshgrid(np.linspace(0.1,np.pi,self.res),np.linspace(Rin,Rout,self.res))
+            (self.theta,self.r)=np.meshgrid(np.linspace(0.1,np.pi,self.res),
+                                                        np.linspace(Rin,Rout,self.res))
             (self.x0,self.y0)=(self.r*np.cos(self.theta),self.r*np.sin(self.theta))
-            self.X00 = np.concatenate((self.x0.reshape(self.res2),self.y0.reshape(self.res2),np.zeros(self.res2),np.zeros(self.res2)))
+            self.X00 = np.concatenate((self.x0.reshape(self.res2),self.y0.reshape(self.res2),
+                                                        np.zeros(self.res2),np.zeros(self.res2)))
 
 
     def OribtSolve(self,orbits,n=1,Precision=100,solve_ivp=False):
@@ -90,20 +106,21 @@ class Trojan:
                 return np.concatenate(dXdt)
             
             '''
-            ######################################################################################################
+            ######################################################################################
             Choose Integrator:
             odeint, uses  LSODA from the FORTRAN library odepack, switches stiff/nonstiff solver.
             solve_ivp, is set to use RK45, use with 2D heatmaps.
             '''
             if(solve_ivp==True):
                 X = scipy.integrate.solve_ivp(Derivative,(self.t[0],self.t[-1]),X0,
-                                              t_eval=self.t,method='RK45',vectorized=True,max_step=0.5).y
+                                              t_eval=self.t,method='RK45',vectorized=True,
+                                                                            max_step=0.5).y
             else:
                 X = scipy.integrate.odeint(Derivative,X0,t,tfirst=True).T
             
             
             '''
-            ######################################################################################################
+            ########################################################################################
             '''                
             return X
         self.X= OrbitSolve(self.X00, self.t,n)
